@@ -1,0 +1,40 @@
+name: CI - Build and Test
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET 8
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+        
+    - name: Display .NET version
+      run: dotnet --version
+      
+    - name: Restore dependencies
+      run: dotnet restore TodoListApp.sln
+      
+    - name: Build solution
+      run: dotnet build TodoListApp.sln --configuration Release --no-restore
+      
+    - name: Run tests
+      run: dotnet test TodoListApp.sln --configuration Release --no-build --verbosity normal
+      
+    - name: Test Summary
+      if: success()
+      run: echo "✅ All tests passed successfully!"
+      
+    - name: Test Failure
+      if: failure()
+      run: echo "❌ Tests failed. Please check the logs above."
